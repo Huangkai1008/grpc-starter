@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package route_guide;
+
+
+service RouteGuide {
+  // 简单RPC
+  //
+  // 包含给定的坐标点的要素信息
+  //
+  // 如果返回的要素信息名称为空，代表对于给定的点没有要素信息
+  rpc get_feature(Point) returns (Feature) {}
+
+  // 服务器到客户端的流式RPC
+  //
+  // 获取给定Rectangle中可用的特征，以流式传输
+  rpc list_features(Rectangle) returns (stream Feature) {}
+
+  // 客户端到服务器的流式RPC
+  //
+  // 接受正在遍历的路线上的坐标的流，返回一个遍历完成后的RouteSummary
+  rpc record_route(stream Point) returns (RouteSummary) {}
+
+  // 双向流式RPC
+  //
+  // 接受遍历路径时发送的RouteNotes流时，再接收其他的RouteNotes（例如来自其他用户）
+  rpc route_chat(stream RouteNote) returns (stream RouteNote) {}
+}
+
+// Point表示纬度-经度组成的坐标
+message Point {
+  // 纬度
+  int32 latitude = 1;
+
+  // 经度
+  int32 longitude = 2;
+}
+
+
+// Rectangle表示经纬度矩形
+message Rectangle {
+  // 矩形的一角
+  Point lo = 1;
+
+  // 矩形的另一角
+  Point hi = 2;
+}
+
+
+// Feature命名给点的要素
+message Feature {
+  // 要素名称
+  string name = 1;
+
+  // 特征的点
+  Point location = 2;
+}
+
+// RouteNote指代给定点发送的消息
+message RouteNote {
+  // 发送消息的位置
+  Point location = 1;
+
+  // 要发送的信息
+  string message = 2;
+}
+
+
+message RouteSummary {
+  // 收到的坐标总数
+  int32 point_count = 1;
+
+  // 遍历路线时通过的已知要素的数量
+  int32 feature_count = 2;
+
+  // 距离（米）
+  int32 distance = 3;
+
+  // 遍历的持续时间
+  int32 elapsed_time = 4;
+}
